@@ -1,156 +1,174 @@
-# 🪔 Virasat Connect — Heritage Tracker
+# 🪡 Virasat-Connect
 
-> A platform where artisans register handmade products and generate a **Digital Birth Certificate** via QR code to prove authenticity and tell their story.
-
----
-
-## 🏗️ Project Structure
-
-```
-virasat-connect/
-├── server/                  # Node.js + Express API
-│   ├── config/db.js         # MySQL connection pool
-│   ├── middleware/auth.js   # JWT verification middleware
-│   ├── routes/
-│   │   ├── auth.js          # POST /register, POST /login, GET /me
-│   │   └── products.js      # POST /, GET /mine, GET /:certId, GET /calculator/estimate
-│   ├── schema.sql           # ← RUN THIS FIRST
-│   ├── index.js             # Express app entry point
-│   └── .env.example         # Copy to .env and fill in values
-│
-├── client/                  # React + Vite + Tailwind
-│   └── src/
-│       ├── context/AuthContext.jsx   # JWT auth state
-│       ├── components/
-│       │   ├── Navbar.jsx
-│       │   ├── ProtectedRoute.jsx
-│       │   └── FairTradeCalculator.jsx
-│       └── pages/
-│           ├── HomePage.jsx
-│           ├── LoginPage.jsx
-│           ├── RegisterPage.jsx
-│           ├── DashboardPage.jsx       # Protected
-│           └── ProductStoryPage.jsx    # Public + Printable Certificate
-│
-└── package.json             # Root: runs both with concurrently
-```
+### *Every thread has a story. Every maker deserves to be heard.*
 
 ---
 
-## ⚡ Quick Setup (Step by Step)
+## What is this?
 
-### Step 1 — MySQL Database
+Virasat-Connect is a platform built for the artisans who wake up before sunrise, sit at their looms, and spend weeks crafting something beautiful — only to have it sold without anyone knowing their name.
 
-```bash
-# Make sure MySQL is running, then:
-mysql -u root -p < server/schema.sql
+We fix that.
 
-# Verify it worked:
-mysql -u root -p -e "USE virasat_connect; SHOW TABLES;"
-# Should show: artisans, products
-```
+When an artisan registers a product on Virasat-Connect, they get a **Digital Birth Certificate** — a unique QR code that tells the world exactly who made it, how long it took, what it's made of, and the story behind it. Scan the QR code on your phone and you're taken directly to that artisan's story page.
 
-### Step 2 — Server Environment
+No middlemen. No anonymous "handmade" labels. Just real people, real craft, real stories.
+
+---
+
+## The Problem We're Solving
+
+India has millions of artisans — weavers, woodworkers, potters, embroiderers — whose skills have been passed down for generations. But in the age of fast fashion and mass production, their work gets undervalued, their identity gets stripped away, and buyers have no way to verify authenticity.
+
+Virasat-Connect gives artisans a digital identity and gives buyers a way to trust what they're buying.
+
+---
+
+## Features
+
+**For Artisans**
+- Register handmade products with their full story
+- Get a unique product ID (e.g. `VC-2024-PA-4821`) and QR code instantly
+- Use the built-in **Fair-Trade Calculator** to figure out what their work is actually worth — based on a living wage, not a race to the bottom
+
+**For Buyers**
+- Scan any QR code to see the full product story
+- Meet the maker — their craft, their village, their years of experience
+- View a beautiful **Certificate of Authenticity** with a gold border that can be printed or shared
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React.js (Vite) + Tailwind CSS |
+| Backend | Node.js + Express.js |
+| Database | MySQL (hosted on Filess.io) |
+| Auth | JWT tokens |
+| QR Codes | qrcode.react |
+| Frontend Deploy | Vercel |
+| Backend Deploy | Render |
+
+---
+
+## Live Demo
+
+| | URL |
+|-|-----|
+| 🌐 Frontend | https://virasat-xi.vercel.app |
+| ⚙️ Backend API | https://virasat-t2tm.onrender.com |
+| 🔍 Health Check | https://virasat-t2tm.onrender.com/api/health |
+
+---
+
+## Running Locally
+
+**Prerequisites:** Node.js v18+, MySQL
+
+### Backend
 
 ```bash
 cd server
-cp .env.example .env
+npm install
 ```
 
-Open `.env` and fill in:
+Create a `.env` file:
+
 ```
-DB_PASSWORD=your_mysql_root_password
-JWT_SECRET=run_this_to_generate: node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=yourpassword
+DB_NAME=virasat_connect
+JWT_SECRET=your_secret_key
+JWT_EXPIRES_IN=7d
+PORT=4000
+CLIENT_URL=http://localhost:5173
 ```
 
-### Step 3 — Install Dependencies
+Load the database schema:
 
 ```bash
-# From project root:
-npm install          # installs concurrently
-npm run install:all  # installs server + client deps
+mysql -u root -p < schema.sql
 ```
 
-### Step 4 — Run Everything
+Start the server:
 
 ```bash
+node index.js
+```
+
+### Frontend
+
+```bash
+cd client
+npm install
 npm run dev
 ```
 
-This starts:
-- **API** → http://localhost:5000
-- **Frontend** → http://localhost:5173
+Open http://localhost:5173
 
 ---
 
-## 🌐 Routes & Features
+## Database Schema
 
-| Route | Description |
-|---|---|
-| `/` | Landing page |
-| `/register` | Artisan registration |
-| `/login` | Artisan login |
-| `/dashboard` | 🔒 Protected workspace: register products, view QR codes |
-| `/product/:certificateId` | Public product story page + printable certificate |
+Two tables. Simple and clean.
 
----
+- **artisans** — stores the maker's profile (name, craft, village, bio, years of experience)
+- **products** — stores each registered product, linked to its artisan, with a unique certificate ID
 
-## 🔌 API Endpoints
-
-### Auth
-| Method | Endpoint | Body | Auth |
-|---|---|---|---|
-| POST | `/api/auth/register` | name, email, password, craft, village, state, bio | — |
-| POST | `/api/auth/login` | email, password | — |
-| GET | `/api/auth/me` | — | Bearer token |
-
-### Products
-| Method | Endpoint | Body / Params | Auth |
-|---|---|---|---|
-| POST | `/api/products` | name, material, hours_worked, material_cost, final_price, story | Bearer token |
-| GET | `/api/products/mine` | — | Bearer token |
-| GET | `/api/products/:certificateId` | — | Public |
-| GET | `/api/products/calculator/estimate?hours=X&material_cost=Y` | — | Public |
+Every product has a foreign key back to its artisan, so the story page always knows who made it.
 
 ---
 
-## 💰 Fair-Trade Price Formula
+## The Fair-Trade Calculator
+
+One of the small things we're most proud of. Artisans often underprice their work because they don't have a reference point.
+
+The calculator takes:
+- Hours worked
+- Material cost
+
+And suggests a fair selling price based on a **₹130/hour living wage**, plus overhead and a reasonable artisan margin. It's not a magic number — it's a starting point for a fair conversation.
+
+---
+
+## API Endpoints
 
 ```
-Labour Cost    = hours_worked × ₹350/hr (India living wage)
-Raw Total      = Labour Cost + Material Cost
-Suggested Price = Raw Total × 1.20 (20% overhead)
+POST   /api/auth/register          Register a new artisan
+POST   /api/auth/login             Login
+GET    /api/products               List products for an artisan
+POST   /api/products               Register a new product
+GET    /api/products/:uid          Get product + artisan details by certificate ID
+GET    /api/health                 Health check
 ```
 
 ---
 
-## 🖨️ Printing the Certificate
+## Built At
 
-1. Open any product's story page: `/product/:certificateId`
-2. Click **"Print Certificate"**
-3. Browser print dialog opens — select "Save as PDF" for a digital copy
-4. The certificate includes: artisan details, product credentials, story quote, QR code, and certificate ID
+This project was built as an MVP during a 48-hour hackathon. The goal was simple: make something that could actually help real people, not just impress judges.
 
 ---
 
-## 🚀 Hackathon Tips
+## What's Next
 
-1. **Judges test the QR code** — make sure the product story page loads fast
-2. **The certificate is the wow moment** — demo it by printing to PDF live
-3. **Seed data** — the schema includes a test artisan (email: razia@example.com, password: password123)
-4. **If MySQL fails** — swap `server/config/db.js` with a Supabase connection string in under 5 minutes
+- Photo uploads for products
+- Artisan verification badges
+- WhatsApp sharing for QR codes
+- Multi-language support (Hindi, Kashmiri, Urdu)
+- Marketplace integration so buyers can purchase directly
 
 ---
 
-## 🎨 Design System
+## The Name
 
-| Token | Value | Use |
-|---|---|---|
-| `saffron` | `#E8631A` | CTAs, accents |
-| `earth` | `#6B4226` | Text, navbar |
-| `cream` | `#FDF6EC` | Background |
-| `gold` | `#C9963B` | Borders, QR frame |
-| `forest` | `#2D5016` | Success, calculator |
-| Font Display | Playfair Display | Headings |
-| Font Body | Lato | UI text |
-| Font Mono | Courier Prime | Certificate IDs |
+**Virasat** (विरासत) means *heritage* or *legacy* in Urdu and Hindi.
+
+Because that's what this is about — making sure the legacy of Indian craftsmanship doesn't get lost in a world that's forgotten how to slow down.
+
+---
+
+*Made with respect for the hands that make things.*
