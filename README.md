@@ -165,7 +165,7 @@ This project was built as an MVP during a 48-hour hackathon. The goal was simple
 
 ## The Name
 
-**Virasat** (विरासत) means *heritage* or *legacy* in Urdu and Hindi.
+**Virasat** means *heritage* or *legacy* in Urdu and Hindi.
 
 Because that's what this is about — making sure the legacy of Indian craftsmanship doesn't get lost in a world that's forgotten how to slow down.
 
